@@ -1,0 +1,98 @@
+<!-- 9940b77cc8afdb3274abfe4b0f10a747 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        #weather-container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="weather-container">
+    <h2>Weather Update</h2>
+    <p id="loading-message">Fetching weather data...</p>
+    <div id="weather-info"></div>
+</div>
+
+<script>
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showWeather, showError);
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+    }
+
+    function showWeather(position) {
+        const apiKey = '9940b77cc8afdb3274abfe4b0f10a747';  // Replace with your OpenWeatherMap API key
+
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`;
+
+        // Display loading message
+        const loadingMessage = document.getElementById('loading-message');
+        loadingMessage.textContent = 'Fetching weather data...';
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const weatherInfo = document.getElementById('weather-info');
+                weatherInfo.innerHTML = `
+                    <h3>Weather in ${data.name}, ${data.sys.country}</h3>
+                    <p>Temperature: ${data.main.temp}°C</p>
+                    <p>Description: ${data.weather[0].description}</p>
+                    <p>Humidity: ${data.main.humidity}%</p>
+                    <p>Wind Speed: ${data.wind.speed} m/s</p>
+                `;
+                // Clear loading message
+                loadingMessage.textContent = '';
+            })
+            .catch(error => {
+                console.error('Error fetching weather data:', error);
+                const weatherInfo = document.getElementById('weather-info');
+                weatherInfo.innerHTML = '<p>Error fetching weather data. Please try again.</p>';
+                // Clear loading message
+                loadingMessage.textContent = '';
+            });
+    }
+
+    function showError(error) {
+        const loadingMessage = document.getElementById('loading-message');
+        switch(error.code) {
+            case error.PERMISSION_DENIED:
+                loadingMessage.textContent = "User denied the request for Geolocation. Please enter the city manually.";
+                break;
+            case error.POSITION_UNAVAILABLE:
+                loadingMessage.textContent = "Location information is unavailable. Please enter the city manually.";
+                break;
+            case error.TIMEOUT:
+                loadingMessage.textContent = "The request to get user location timed out. Please enter the city manually.";
+                break;
+            case error.UNKNOWN_ERROR:
+                loadingMessage.textContent = "An unknown error occurred. Please enter the city manually.";
+                break;
+        }
+    }
+
+    // Call getLocation on page load
+    window.onload = getLocation;
+</script>
+
+</body>
+</html>
